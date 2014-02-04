@@ -1,0 +1,88 @@
+#!/usr/bin/perl
+#
+# t2pl
+#
+# translate TSQL to PL/SQL
+#
+# Reads all 0*.sql files, replaces TSQL specific statements, 
+# and outputs 1*.sql files.
+
+use strict;
+use English;
+
+# initialize variables
+my $myDir = $ARGV[0] ? $ARGV[0] : '.'; # directory in which to search for SQL files
+my $thisFile;                          # current input file name
+my $thisLine;                          # current input line
+my $outFile;                           # current output file name
+my $outLine;                           # current output line
+
+opendir(THISDIR, $myDir) || die "Cannot open directory $myDir - $!\n";
+
+DIRLOOP: foreach $thisFile (readdir(THISDIR)) {
+
+	if ($thisFile =~ /^0(.*\.sql)$/) {
+		$outFile = '1' . $1;
+
+		# don't bother to do any that have already been done
+		if (-e $outFile) {
+			next DIRLOOP;
+		
+		} else {
+			open(THISFILE, '<' . $thisFile) || die "Cannot open file $thisFile - $!\n";
+			open(OUTFILE, '>' . $outFile) || die "Cannot open output file $outFile - $!\n";
+			
+			FILELOOP: foreach $thisLine (<THISFILE>) {
+
+				# strip off the SVN header 'cuz Win7 ODBC driver chokes on it
+				if ($thisLine =~ /^--/) {
+					next FILELOOP;
+				}
+				
+				# replace the SVN header after the select statement so that Win7 ODBC driver doesn't choke on it
+				if ($thisLine =~ /^select/) {
+					$thisLine .= "--\t\$HeadURL\$\n--\t\$Id\$\n";
+				}
+				
+				# replace .ID with ."ID"
+				if ($thisLine =~ /^.*\.ID.*$/) {
+					$thisLine =~ s/^(.*)\.ID(.*)$/\1\."ID"\2/g;
+				}
+				
+				# replace isnull
+				if ($thisLine =~ /^.*isnull\(.*,\b?''\)\b?(=|<>)\b?''.*$/) {
+					print $thisLine;
+					if ($1 eq '=') {
+						$thisLine =~ s/^(.*)isnull\((.*),\b?''\)\b?(=|<>)\b?''(.*)$/\1\2 is null/g;
+					} else {
+						$thisLine =~ s/^(.*)isnull\((.*),\b?''\)\b?(=|<>)\b?''(.*)$/\1\2 is not null/g;
+					}
+					print "$thisLine\n";
+				}
+				
+				# strip out ; 'cuz Pervasive chokes on it
+				if ($thisLine =~ /;$/) {
+					$thisLine =~ s/^(.*);$/\1/g;
+				}
+				
+				# replace <> 0 with <> '0'
+				if ($thisLine =~ /CV__CONVIO_ID__C <> 0/i) {
+					$thisLine =~ s/^(.*)<> 0(.*)/\1<> '0'\2/g;
+				}
+				
+				# remove dbo.
+				if ($thisLine =~ /dbo\./i) {
+					print $thisLine;
+					$thisLine =~ s/^(.*)dbo\.(.*)/\1\2/g;
+					print "$thisLine\n";
+				}
+				
+				print OUTFILE $thisLine;
+		} # end loop through file content
+			
+			close(THISFILE);
+			close(OUTFILE);
+			
+		} # end if $outFile already exists
+	} # end if $thisFile is the right kind
+} # end loop through directory list

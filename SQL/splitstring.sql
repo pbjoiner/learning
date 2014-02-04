@@ -1,7 +1,5 @@
---	$HeadURL: http://scm.corp.convio.com/svn/convio/design/trunk/Deployment_Source/Templates/SQL/Oracle/splitstring.sql $
---	$Id: splitstring.sql 272657 2014-02-03 16:42:23Z pjoiner@convio.com $
--- 
 -- splitstring
+--
 -- Returns the specified instance of a substring from a longer
 -- string after dividing that string by instances of a shorter
 -- string. Essentially, this duplicates the function of Perl's

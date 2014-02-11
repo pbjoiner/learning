@@ -13,7 +13,7 @@ create or replace function splitstring (
 ) return varchar2
 is
 	type array_v is table of varchar2(60);
-	retArray   array_v;
+	retArray   array_v      := array_v();
 	thisString varchar2(60) := myString;
 
 begin
@@ -23,7 +23,7 @@ begin
 	while (instr(thisString, mySplitter) > 0)
 	loop
 		retArray.extend;
-		retArray(retArray.count) := substr(thisString, 1, instr(thisString, mySplitter));
+		retArray(retArray.count) := substr(thisString, 1, instr(thisString, mySplitter) - 1);
 		thisString := substr(thisString, instr(thisString, mySplitter) + 1);
 	end loop;
 

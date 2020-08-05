@@ -1,0 +1,3 @@
+#!/bin/bash
+# count non-blank lines
+cat $1 | grep '[^ ]' | wc -l

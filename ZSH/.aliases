@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# define my aliases
+
+alias cp='cp -vr'
+alias dir='ls -AlG'
+alias grep='grep -rIl --color=always --exclude="*\.git" --exclude-dir=node_modules'
+alias hm='cd ~;clear'
+alias mv='mv -v'
+alias prep='perl -pi -w -e'
+alias rsync='rsync -vazciL --size-only - _build/*** - deps/***'
+alias rmsln='find -L . -type l -exec rm {} +'
+alias ssh='ssh -C'
+alias tbz='tar -xjvf'
+alias tgz='tar -xzvf'
+alias updatedb="sudo /usr/libexec/locate.updatedb"
+alias teg='cd ~/Projects;ls -AlG'
+alias lc='wc -l'
+
+# show and hide files in Finder
+#alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
+#alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
